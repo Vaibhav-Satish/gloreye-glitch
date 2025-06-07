@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shading Soon Cuties</title>
 <style>
-  /* Make the canvas fill the parent container */
   html, body, #glitch-container {
     margin: 0; padding: 0; height: 100%; width: 100%; background: black; overflow: hidden;
   }
@@ -14,7 +13,6 @@
     width: 100%;
     height: 100%;
   }
-  /* Optional vignette overlays */
   #outer-vignette {
     position: absolute;
     top: 0; left: 0;
@@ -22,15 +20,26 @@
     pointer-events: none;
     background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%);
   }
-  #center-vignette {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
-  }
   #glitch-container {
     position: relative;
+  }
+
+  /* Cursor trail styles */
+  .cursor-trail {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    animation: fadeOut 1s forwards;
+  }
+
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: scale(0.5);
+    }
   }
 </style>
 </head>
@@ -39,35 +48,36 @@
 <div id="glitch-container">
   <canvas id="glitch-canvas"></canvas>
   <div id="outer-vignette"></div>
-  <!-- Uncomment next line to enable center vignette -->
-  <!-- <div id="center-vignette"></div> -->
 </div>
 
 <script>
+// CURSOR TRAIL CODE
+const trailChar = “😎”;
+document.addEventListener("mousemove", (e) => {
+  const span = document.createElement("span");
+  span.textContent = trailChar;
+  span.className = "cursor-trail";
+  span.style.left = e.clientX + "px";
+  span.style.top = e.clientY + "px";
+  document.body.appendChild(span);
+  setTimeout(() => span.remove(), 1000);
+});
+
+// GLITCH CANVAS CODE
 (() => {
   const canvas = document.getElementById('glitch-canvas');
   const ctx = canvas.getContext('2d');
   const container = document.getElementById('glitch-container');
 
   const glitchColors = ['#2b4539', '#61dca3', '#61b3dc'];
-  const glitchSpeed = 50; // ms between glitch updates
+  const glitchSpeed = 50;
   const smooth = true;
-
   const fontSize = 16;
   const charWidth = 10;
   const charHeight = 20;
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>,0123456789'.split('');
 
-  const charset = [
-    'A','B','C','D','E','F','G','H','I','J','K','L','M',
-    'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-    '!','@','#','$','&','*','(',')','-','_','+','=','/',
-    '[',']','{','}',';',':','<','>',',','0','1','2','3',
-    '4','5','6','7','8','9'
-  ];
-
-  let columns = 0;
-  let rows = 0;
-  let letters = [];
+  let columns = 0, rows = 0, letters = [];
 
   function randomChar() {
     return charset[Math.floor(Math.random() * charset.length)];
@@ -117,7 +127,6 @@
 
     columns = Math.ceil(rect.width / charWidth);
     rows = Math.ceil(rect.height / charHeight);
-
     initLetters();
   }
 
@@ -170,7 +179,6 @@
   }
 
   let lastGlitchTime = Date.now();
-
   function animate() {
     const now = Date.now();
     if (now - lastGlitchTime >= glitchSpeed) {
@@ -182,10 +190,7 @@
     requestAnimationFrame(animate);
   }
 
-  window.addEventListener('resize', () => {
-    resize();
-  });
-
+  window.addEventListener('resize', resize);
   resize();
   animate();
 })();
